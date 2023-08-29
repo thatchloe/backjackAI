@@ -1,8 +1,10 @@
 import pandas as pd
 
 from sklearn.cluster import KMeans
+from blackjack.computer_vision.utils import timeit
 
 
+@timeit
 def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
     """
     Clusters cards of dealer and player for simple case with only one player.
@@ -35,6 +37,7 @@ def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
     clean_pred_df["cluster"] = clean_pred_df["cluster"].replace(
         {dealer_cluster: "dealer", player_cluster: "player"}
     )
+    clean_pred_df["class"] = clean_pred_df["class"].apply(lambda x: x[:-1])
 
     # create a results dict, containing all cards
     result_dict = clean_pred_df.groupby("cluster")["class"].apply(list).to_dict()
