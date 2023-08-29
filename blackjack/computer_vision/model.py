@@ -1,6 +1,15 @@
 from roboflow import Roboflow
 import pandas as pd
 import cv2
+import os
+
+def load_roboflow_model(confidence : int = 40, overlap : int = 30) -> Roboflow.model:
+    """load and return roboflow model"""
+    rf = Roboflow(api_key="")
+
+
+def predict_roboflow_model(confidence : int = 40, overlap : int = 30) ->
+
 
 
 def roboflow_predictions():
@@ -15,7 +24,7 @@ def roboflow_predictions():
     image = cv2.imread("path.img")
 
     predictions = model.predict(
-        "content/My Drive/6. Colab Notebooks/blackjack/data/Example2.png",  # TODO change img source
+        os.path.joinpath("temp_image", "input.png"),
         confidence=40,
         overlap=30,
     ).json()["predictions"]
@@ -26,7 +35,7 @@ def roboflow_predictions():
 
 if __name__ == "__main__":
     try:
-        roboflow_predictions()
+        pass
     except:
         import ipdb, traceback, sys
 
