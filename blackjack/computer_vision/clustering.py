@@ -1,41 +1,44 @@
 import pandas as pd
 
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import MinMaxScaler
 
 
-def clustering_cards(predictions: pd.DataFrame, players: int = 1):
+def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
     """
-    - Clusters the cards for a given number of players (+ dealer)
+    Clusters cards of dealer and player for simple case with only one player.
+    Note(!): requires dealers cards to be on top of image!
     """
-    # Scale coordinates of cards
-    minmax = MinMaxScaler()
-    X = predictions[["x", "y"]]
-    X_trans = minmax.fit_transform(X)
+    # prepare data
+    X = card_predictions_df[["x", "y"]]
 
-    # KMeans clustering
-    km = KMeans(n_clusters=players + 1)
-    km.fit(X_trans)
+    # run kmeans clustering with 2 clusters (Dealer & Player)
+    km = KMeans(n_clusters=2)
+    km.fit(X)
+    card_predictions_df["cluster"] = km.labels_  # save predicted cluster to original df
 
-    predictions["group"] = km.labels_
+    # decide which cluster is the dealer cluster and which the players
+    # by looking which clister has lowest mean y coord, i.e. is at top in image
+    mean_vertical_position_by_cluster = (
+        card_predictions_df.groupby("cluster")[["y"]]
+        .mean()
+        .sort_values("y")
+        .reset_index()
+    )
 
-    # TODO Filter which cards belong to the dealer and which to the player(s).
-    # Case 1 player + dealer:
-    # Card 1 to P
-    # Card 1, faced down, to D
-    # Card 2 to P
-    # Card 2, faced down, to D
-    # Reveal D's Card 1
+    dealer_cluster = mean_vertical_position_by_cluster.iloc[0, 0]  # lowest mean y
+    player_cluster = mean_vertical_position_by_cluster.iloc[1, 0]  # highest mean y
 
-    # As we applied MinMax, one delear's card will be in 0,0 coordinates. Use that to tag delares/player before KMeans.
+    # clean df and rename clusters
+    clean_pred_df = card_predictions_df.drop_duplicates(subset="class")[
+        ["class", "cluster"]
+    ]
+    clean_pred_df["cluster"] = clean_pred_df["cluster"].replace(
+        {dealer_cluster: "dealer", player_cluster: "player"}
+    )
 
+    # create a results dict, containing all cards
+    result_dict = clean_pred_df.groupby("cluster")["class"].apply(list).to_dict()
 
-if __name__ == "__main__":
-    try:
-        clustering_cards(placeholder, 1)
-    except:
-        import ipdb, traceback, sys
+    print("✅ clustered predictions for one player")
 
-        extype, value, tb = sys.exc_info()
-        traceback.print_exc()
-        ipdb.post_mortem(tb)
+    return result_dict

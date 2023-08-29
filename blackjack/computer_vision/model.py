@@ -1,7 +1,7 @@
 from roboflow import Roboflow
 import pandas as pd
 import os
-from params import (
+from blackjack.computer_vision.params import (
     ROBOFLOW_API_KEY,
     ROBOFLOW_MODEL,
     ROBOFLOW_VERSION,
@@ -11,37 +11,32 @@ from params import (
 
 
 # TODO cache model outside
-def load_roboflow_model() -> Roboflow.model:
+def load_roboflow_model() -> Roboflow:
     """
     Load and return roboflow model
     """
     rf = Roboflow(api_key=ROBOFLOW_API_KEY)
     project = rf.workspace().project(ROBOFLOW_MODEL)
     model = project.version(int(ROBOFLOW_VERSION)).model
+
+    print("✅ load roboflow model")
+
     return model
 
 
 def predict_roboflow_model(
-    model: Roboflow.model, image_file_name: str = "input.png"
+    model: Roboflow, image_file_name: str = "input.png"
 ) -> pd.DataFrame:
     """
     Predict based on input Roboflow model, return df
     """
-    predictions = model.predict(
-        os.path.joinpath("blackjack", "computer_vision", "temp_image", image_file_name),
+    card_predictions = model.predict(
+        os.path.join("temp_image", image_file_name),
         confidence=int(ROBOFLOW_CONFIDENCE),
         overlap=int(ROBOFLOW_OVERLAP),
     ).json()["predictions"]
-    return pd.DataFrame(predictions)
+    card_predictions_df = pd.DataFrame(card_predictions)[["x", "y", "class"]]
 
+    print("✅ predict with roboflow model")
 
-if __name__ == "__main__":
-    try:
-        model = load_roboflow_model()
-        predict_roboflow_model(model)
-    except:
-        import ipdb, traceback, sys
-
-        extype, value, tb = sys.exc_info()
-        traceback.print_exc()
-        ipdb.post_mortem(tb)
+    return card_predictions_df
