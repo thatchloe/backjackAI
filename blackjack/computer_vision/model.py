@@ -1,41 +1,44 @@
 from roboflow import Roboflow
 import pandas as pd
-import cv2
 import os
+from params import (
+    ROBOFLOW_API_KEY,
+    ROBOFLOW_MODEL,
+    ROBOFLOW_VERSION,
+    ROBOFLOW_CONFIDENCE,
+    ROBOFLOW_OVERLAP,
+)
 
-def load_roboflow_model(confidence : int = 40, overlap : int = 30) -> Roboflow.model:
-    """load and return roboflow model"""
-    rf = Roboflow(api_key="")
 
-
-def predict_roboflow_model(confidence : int = 40, overlap : int = 30) ->
-
-
-
-def roboflow_predictions():
+# TODO cache model outside
+def load_roboflow_model() -> Roboflow.model:
     """
-    - Requests predictions to the Roboflow model using their API, given an image provided by the user
-    - Returns a DataFrame with the predictions
+    Load and return roboflow model
     """
-    # TODO cache model outside
-    rf = Roboflow(api_key="")  # TODO API key to be inserted (Secrets?)
-    project = rf.workspace().project("playing-cards-ow27d")  # project name
-    model = project.version(1).model
-    image = cv2.imread("path.img")
+    rf = Roboflow(api_key=ROBOFLOW_API_KEY)
+    project = rf.workspace().project(ROBOFLOW_MODEL)
+    model = project.version(int(ROBOFLOW_VERSION)).model
+    return model
 
+
+def predict_roboflow_model(
+    model: Roboflow.model, image_file_name: str = "input.png"
+) -> pd.DataFrame:
+    """
+    Predict based on input Roboflow model, return df
+    """
     predictions = model.predict(
-        os.path.joinpath("temp_image", "input.png"),
-        confidence=40,
-        overlap=30,
+        os.path.joinpath("blackjack", "computer_vision", "temp_image", image_file_name),
+        confidence=int(ROBOFLOW_CONFIDENCE),
+        overlap=int(ROBOFLOW_OVERLAP),
     ).json()["predictions"]
-    predictions_df = pd.DataFrame(predictions)
-
-    return predictions_df
+    return pd.DataFrame(predictions)
 
 
 if __name__ == "__main__":
     try:
-        pass
+        model = load_roboflow_model()
+        predict_roboflow_model(model)
     except:
         import ipdb, traceback, sys
 
