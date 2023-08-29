@@ -31,7 +31,7 @@ def predict_roboflow_model(
     Predict based on input Roboflow model, return df
     """
     card_predictions = model.predict(
-        os.path.join("temp_image", image_file_name),
+        os.path.join("blackjack", "computer_vision", "temp_image", image_file_name),
         confidence=int(ROBOFLOW_CONFIDENCE),
         overlap=int(ROBOFLOW_OVERLAP),
     ).json()["predictions"]

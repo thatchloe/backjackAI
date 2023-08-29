@@ -4,3 +4,4 @@ roboflow
 fastapi
 pytz
 uvicorn
+python-multipart
