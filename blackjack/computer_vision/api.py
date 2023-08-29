@@ -8,9 +8,11 @@ import cv2
 import io
 import os
 
+from blackjack.computer_vision.model import load_roboflow_model, predict_roboflow_model
+
 app = FastAPI()
 
-# Allow all requests (optional, good for development purposes)
+# Allow all requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows all origins
@@ -19,41 +21,37 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# Cache model
+app.state.model = load_roboflow_model()
+
 
 @app.get("/")
 def index():
     return {"status": "ok"}
 
 
-@app.post("/upload_image")
+@app.post("/roboflow_predictions_image")
 async def receive_image(img: UploadFile = File(...)):
-    breakpoint()
-    ### Receiving and decoding the image
+    # Receiving and decoding the image
+
     contents = await img.read()
 
     nparr = np.fromstring(contents, np.uint8)
     cv2_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)  # type(cv2_img) => numpy.ndarray
 
-    # Image directory (TODO add to params)
-    directory = os.path.joinpath("blackjack", "computer_vision", "temp_image")
+    # Image directory
+    directory = os.path.join("blackjack", "computer_vision", "temp_image")
     # Temporary image file name
     filename = "input.png"
 
-    cv2.imwrite(directory, filename)  # TODO temporarly save image
+    # Temporarly saves image
+    cv2.imwrite(os.path.join(directory, filename), cv2_img)
 
-    # TODO call roboflow_predictions function
+    # Call roboflow model functio
+    predictions = predict_roboflow_model(app.state.model)
+    prediction_values = list(predictions["class"].values)
 
     # Remove temp image
-    os.remove(os.path.joinpath(directory, filename)
+    # os.remove(os.path.join(directory, filename))
 
-    return Response(content=im.tobytes(), media_type="image/png")
-
-if __name__ == '__main__':
-
-    try:
-
-    except:
-        import ipdb, traceback, sys
-        extype, value, tb = sys.exc_info()
-        traceback.print_exc()
-        ipdb.post_mortem(tb)
+    return {"test": prediction_values}

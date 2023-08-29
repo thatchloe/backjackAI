@@ -1,7 +1,7 @@
 from roboflow import Roboflow
 import pandas as pd
 import os
-from params import (
+from blackjack.computer_vision.params import (
     ROBOFLOW_API_KEY,
     ROBOFLOW_MODEL,
     ROBOFLOW_VERSION,
@@ -10,8 +10,13 @@ from params import (
 )
 
 
+class RoboFlowModel:
+    def __init__(self) -> None:
+        pass
+
+
 # TODO cache model outside
-def load_roboflow_model() -> Roboflow.model:
+def load_roboflow_model() -> RoboFlowModel:
     """
     Load and return roboflow model
     """
@@ -22,13 +27,13 @@ def load_roboflow_model() -> Roboflow.model:
 
 
 def predict_roboflow_model(
-    model: Roboflow.model, image_file_name: str = "input.png"
+    model: RoboFlowModel, image_file_name: str = "input.png"
 ) -> pd.DataFrame:
     """
     Predict based on input Roboflow model, return df
     """
     predictions = model.predict(
-        os.path.joinpath("blackjack", "computer_vision", "temp_image", image_file_name),
+        os.path.join("blackjack", "computer_vision", "temp_image", image_file_name),
         confidence=int(ROBOFLOW_CONFIDENCE),
         overlap=int(ROBOFLOW_OVERLAP),
     ).json()["predictions"]

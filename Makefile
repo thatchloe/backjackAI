@@ -11,4 +11,4 @@ install_frontend:
 	@pip install -e ./blackjack/frontend
 
 run_api:
-	uvicorn taxifare.api.fast:app --reload
+	uvicorn blackjack.computer_vision.api:app --reload
