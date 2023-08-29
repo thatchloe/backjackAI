@@ -27,6 +27,7 @@ def index():
 
 @app.post("/upload_image")
 async def receive_image(img: UploadFile = File(...)):
+    breakpoint()
     ### Receiving and decoding the image
     contents = await img.read()
 
@@ -38,19 +39,13 @@ async def receive_image(img: UploadFile = File(...)):
     # Temporary image file name
     filename = "input.png"
 
-    cv2.imwrite(
-        directory,
-    )  # TODO temporarly save image
+    cv2.imwrite(directory, filename)  # TODO temporarly save image
 
-    ### Do cool stuff with your image.... For example face detection
-    annotated_img = annotate_face()  # TODO call roboflow_predictions function
+    # TODO call roboflow_predictions function
 
-    ### Encoding and responding with the image
-    im = cv2.imencode(".png", annotated_img)[
-        1
-    ]  # extension depends on which format is sent from Streamlit
+    # Remove temp image
+    os.remove(os.path.joinpath(directory, filename)
 
-    remove  # TODO remove temp image
     return Response(content=im.tobytes(), media_type="image/png")
 
 if __name__ == '__main__':

@@ -3,4 +3,11 @@ pandas
 seaborn
 matplotlib
 scikit-learn
+
+# Computer vision
 roboflow
+
+# API
+fastapi
+pytz
+uvicorn
