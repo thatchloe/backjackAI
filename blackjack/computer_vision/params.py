@@ -1,0 +1,8 @@
+import os
+
+# Roboflow
+ROBOFLOW_API_KEY = os.environ.get("ROBOFLOW_API_KEY")
+ROBOFLOW_MODEL = os.environ.get("ROBOFLOW_MODEL")
+ROBOFLOW_VERSION = os.environ.get("ROBOFLOW_VERSION")
+ROBOFLOW_CONFIDENCE = os.environ.get("ROBOFLOW_CONFIDENCE")
+ROBOFLOW_OVERLAP = os.environ.get("ROBOFLOW_OVERLAP")
