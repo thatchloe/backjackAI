@@ -52,6 +52,6 @@ async def receive_image(img: UploadFile = File(...)):
     prediction_values = list(predictions["class"].values)
 
     # Remove temp image
-    # os.remove(os.path.join(directory, filename))
+    os.remove(os.path.join(directory, filename))
 
     return {"test": prediction_values}
