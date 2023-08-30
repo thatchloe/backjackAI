@@ -1,6 +1,7 @@
 from roboflow import Roboflow
 import pandas as pd
 import os
+from blackjack.computer_vision.utils import timeit
 from blackjack.computer_vision.params import (
     ROBOFLOW_API_KEY,
     ROBOFLOW_MODEL,
@@ -11,6 +12,7 @@ from blackjack.computer_vision.params import (
 
 
 # TODO cache model outside
+@timeit
 def load_roboflow_model() -> Roboflow:
     """
     Load and return roboflow model
@@ -24,6 +26,7 @@ def load_roboflow_model() -> Roboflow:
     return model
 
 
+@timeit
 def predict_roboflow_model(
     model: Roboflow, image_file_name: str = "input.png"
 ) -> pd.DataFrame:
