@@ -50,7 +50,6 @@ async def receive_image(img: UploadFile = File(...)):
 
     # Call roboflow model functio
     predictions = predict_roboflow_model(app.state.model)
-    breakpoint()
     clustered_cards = cluster_one_player(predictions)
 
     # Remove temp image

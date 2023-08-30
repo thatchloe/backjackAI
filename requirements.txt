@@ -17,3 +17,4 @@ fastapi
 pytz
 uvicorn
 python-multipart
+requests
