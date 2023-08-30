@@ -9,6 +9,9 @@ ipdb
 # Computer vision
 roboflow
 
+# Frontend
+streamlit
+
 # API
 fastapi
 pytz

@@ -27,6 +27,7 @@ def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
 
     dealer_cluster = mean_vertical_position_by_cluster.iloc[0, 0]  # lowest mean y
     player_cluster = mean_vertical_position_by_cluster.iloc[1, 0]  # highest mean y
+    breakpoint()
 
     # clean df and rename clusters
     clean_pred_df = card_predictions_df.drop_duplicates(subset="class")[
