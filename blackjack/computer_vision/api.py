@@ -4,11 +4,13 @@ from starlette.responses import Response
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import cv2
 import io
 import os
 
 from blackjack.computer_vision.model import load_roboflow_model, predict_roboflow_model
+from blackjack.computer_vision.clustering import cluster_one_player
 
 app = FastAPI()
 
@@ -33,7 +35,6 @@ def index():
 @app.post("/roboflow_predictions_image")
 async def receive_image(img: UploadFile = File(...)):
     # Receiving and decoding the image
-
     contents = await img.read()
 
     nparr = np.fromstring(contents, np.uint8)
@@ -49,9 +50,10 @@ async def receive_image(img: UploadFile = File(...)):
 
     # Call roboflow model functio
     predictions = predict_roboflow_model(app.state.model)
-    prediction_values = list(predictions["class"].values)
+    breakpoint()
+    clustered_cards = cluster_one_player(predictions)
 
     # Remove temp image
     os.remove(os.path.join(directory, filename))
 
-    return {"test": prediction_values}
+    return {"prediction": clustered_cards}
