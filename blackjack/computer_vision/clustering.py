@@ -17,7 +17,6 @@ def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
     km = KMeans(n_clusters=2)
     km.fit(X)
     card_predictions_df["cluster"] = km.labels_  # save predicted cluster to original df
-
     # decide which cluster is the dealer cluster and which the players
     # by looking which clister has lowest mean y coord, i.e. is at top in image
     mean_vertical_position_by_cluster = (

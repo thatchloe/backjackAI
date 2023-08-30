@@ -1,5 +1,9 @@
 import streamlit as st
 import cv2
+import requests
+import os
+import numpy as np
+import io
 
 from roboflow import Roboflow
 
@@ -11,6 +15,8 @@ from blackjack.computer_vision.params import (
     ROBOFLOW_OVERLAP,
 )
 
+ROBOFLOW_SIZE = 416
+
 st.set_page_config(
     page_title="Card Recognition",
     page_icon=":hearts:",
@@ -18,57 +24,37 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-rf = Roboflow(api_key=ROBOFLOW_API_KEY)
-project = rf.workspace().project(ROBOFLOW_MODEL)
-model = project.version(ROBOFLOW_VERSION).model
-
 st.title("Card Recognition")
 st.write("Using Roboflow API")
 
 frame_window = st.image([])
-
 video = cv2.VideoCapture(0)
 
-import os
-
-
-def infer(img):
-    # Resize (while maintaining the aspect ratio) to improve speed and save bandwidth
-    # height, width, channels = img.shape
-    # scale = ROBOFLOW_SIZE / max(height, width)
-    # resized_img = cv2.resize(img, (round(scale * width), round(scale * height)))
-
-    resized_img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    cv2.imwrite("temp.jpg", resized_img_rgb)
-
-    prediction = model.predict(
-        "temp.jpg", confidence=ROBOFLOW_CONFIDENCE, overlap=ROBOFLOW_OVERLAP
-    ).json()
-    print(prediction)
-
-    os.remove("temp.jpg")
-
-    # Draw boxes on the original frame
-    for pred in prediction["predictions"]:
-        x, y, width, height = pred["x"], pred["y"], pred["width"], pred["height"]
-        cv2.rectangle(img, (x, y), (x + width, y + height), (0, 255, 0), 2)
-
-    return img
-
-
-ROBOFLOW_SIZE = 416
 
 while True:
     ret, frame = video.read()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # Resize the frame
+    resized_frame = cv2.resize(frame, (ROBOFLOW_SIZE, ROBOFLOW_SIZE))
 
-    frame_with_boxes = infer(frame)
+    # API call request
+    response = requests.post(
+        "http://127.0.0.1:8000/roboflow_predictions_image",  # TODO change when deployed
+        data={"img": resized_frame.getvalue()},
+    ).json()
 
-    height, width, channels = frame_with_boxes.shape
-    frame_with_boxes = cv2.resize(frame_with_boxes, (width * 2, height * 2))
+    # Draw boxes on the original frame
+    for pred in response["prediction"]:
+        x, y, width, height = (
+            pred["x"],
+            pred["y"],
+        )  # TODO predictions shouls also return ==> pred["width"], pred["height"]
+        cv2.rectangle(
+            frame, (x, y), (x + 50, y + 50), (0, 255, 0), 2
+        )  # TODO replace 50 to width and height
 
-    frame_window.image(frame_with_boxes)
+    height, width, channels = frame.shape
+    frame = cv2.resize(frame, (width * 2, height * 2))
+    frame_window.image(frame)
 
     # Stop the loop if the 'q' key is pressed
     if cv2.waitKey(1) & 0xFF == ord("q"):
