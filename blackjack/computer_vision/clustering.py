@@ -15,7 +15,9 @@ def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
 
     # run kmeans clustering with 2 clusters (Dealer & Player)
     km = KMeans(n_clusters=2)
+
     km.fit(X)
+
     card_predictions_df["cluster"] = km.labels_  # save predicted cluster to original df
 
     # decide which cluster is the dealer cluster and which the players
@@ -43,5 +45,7 @@ def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
     result_dict = clean_pred_df.groupby("cluster")["class"].apply(list).to_dict()
 
     print("✅ clustered predictions for one player")
+
+    breakpoint()
 
     return result_dict
