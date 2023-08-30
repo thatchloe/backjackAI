@@ -29,7 +29,6 @@ frame_window = st.image([])
 
 video = cv2.VideoCapture(0)
 
-
 import os
 
 

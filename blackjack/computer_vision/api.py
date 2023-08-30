@@ -4,6 +4,7 @@ from starlette.responses import Response
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import cv2
 import io
 import os
@@ -49,10 +50,8 @@ async def receive_image(img: UploadFile = File(...)):
 
     # Call roboflow model functio
     predictions = predict_roboflow_model(app.state.model)
-
+    breakpoint()
     clustered_cards = cluster_one_player(predictions)
-
-    # prediction_values = list(predictions["class"].values)
 
     # Remove temp image
     os.remove(os.path.join(directory, filename))

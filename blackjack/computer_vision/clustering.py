@@ -29,20 +29,18 @@ def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
 
     dealer_cluster = mean_vertical_position_by_cluster.iloc[0, 0]  # lowest mean y
     player_cluster = mean_vertical_position_by_cluster.iloc[1, 0]  # highest mean y
-    breakpoint()
 
     # clean df and rename clusters
-    clean_pred_df = card_predictions_df.drop_duplicates(subset="class")[
-        ["class", "cluster"]
-    ]
-    clean_pred_df["cluster"] = clean_pred_df["cluster"].replace(
+    # clean_pred_df = card_predictions_df.drop_duplicates(subset="class")[["class", "cluster"]]
+    # clean_pred_df["cluster"] = clean_pred_df["cluster"].replace({dealer_cluster: "dealer", player_cluster: "player"})
+    # clean_pred_df["class"] = clean_pred_df["class"].apply(lambda x: x[:-1])
+    card_predictions_df["cluster"] = card_predictions_df["cluster"].replace(
         {dealer_cluster: "dealer", player_cluster: "player"}
     )
-    clean_pred_df["class"] = clean_pred_df["class"].apply(lambda x: x[:-1])
 
     # create a results dict, containing all cards
-    result_dict = clean_pred_df.groupby("cluster")["class"].apply(list).to_dict()
+    card_predictions_dict = card_predictions_df.to_dict("records")
 
     print("✅ clustered predictions for one player")
 
-    return result_dict
+    return card_predictions_dict
