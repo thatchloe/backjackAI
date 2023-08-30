@@ -34,25 +34,34 @@ def index():
 
 @app.post("/roboflow_predictions_image")
 async def receive_image(img: UploadFile = File(...)):
+    """
+    Api endpoint, given image, returns predictions and clusters
+    Returns None if there are no predictions
+    """
+
     # Receiving and decoding the image
     contents = await img.read()
-
     nparr = np.fromstring(contents, np.uint8)
     cv2_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)  # type(cv2_img) => numpy.ndarray
 
-    # Image directory
+    # Image directory and file name
     directory = os.path.join("blackjack", "computer_vision", "temp_image")
-    # Temporary image file name
     filename = "input.png"
 
     # Temporarly saves image
     cv2.imwrite(os.path.join(directory, filename), cv2_img)
 
-    # Call roboflow model functio
+    # Call roboflow model function
     predictions = predict_roboflow_model(app.state.model)
-    clustered_cards = cluster_one_player(predictions)
 
-    # Remove temp image
+    # delete the temp image
     os.remove(os.path.join(directory, filename))
 
-    return {"prediction": clustered_cards}
+    # Check if there is prediction, return clustered pred
+    if predictions is None:
+        return None
+
+    else:
+        # clustered_cards = cluster_one_player(predictions)
+        card_predictions_dict = predictions.to_dict("records")
+        return card_predictions_dict
