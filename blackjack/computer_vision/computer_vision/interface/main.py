@@ -1,5 +1,5 @@
-from blackjack.computer_vision.model import load_roboflow_model, predict_roboflow_model
-from blackjack.computer_vision.clustering import cluster_one_player
+from computer_vision.interface.model import load_roboflow_model, predict_roboflow_model
+from computer_vision.interface.clustering import cluster_one_player
 
 
 if __name__ == "__main__":

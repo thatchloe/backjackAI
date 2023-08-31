@@ -1,7 +1,9 @@
 roboflow
-
-# API
 fastapi
 pytz
 uvicorn
 python-multipart
+pandas
+numpy
+opencv-python
+scikit-learn

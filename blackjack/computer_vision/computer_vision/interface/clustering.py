@@ -1,7 +1,7 @@
 import pandas as pd
 
 from sklearn.cluster import KMeans
-from blackjack.computer_vision.utils import timeit
+from computer_vision.interface.utils import timeit
 
 
 @timeit

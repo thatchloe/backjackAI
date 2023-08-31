@@ -67,12 +67,14 @@ while True:
             pred["height"],
         )  # TODO predictions shouls also return ==> pred["width"], pred["height"]
         cv2.rectangle(
-            frame, (x, y), (x + width, y + height), (0, 255, 0), 2
+            frame, (x, y), (x - width, y - height), (0, 255, 0), 2
         )  # TODO replace 50 to width and height
 
         height, width, channels = frame.shape
         frame = cv2.resize(frame, (width * 2, height * 2))
         frame_window.image(frame)
+
+    st.write(response)
 
 
 # Release resources when finished

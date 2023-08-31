@@ -1,8 +1,8 @@
 from roboflow import Roboflow
 import pandas as pd
 import os
-from blackjack.computer_vision.utils import timeit
-from blackjack.computer_vision.params import (
+from computer_vision.interface.utils import timeit
+from computer_vision.interface.params import (
     ROBOFLOW_API_KEY,
     ROBOFLOW_MODEL,
     ROBOFLOW_VERSION,
@@ -35,7 +35,7 @@ def predict_roboflow_model(
     Returns None if there is no predictions
     """
     card_predictions = model.predict(
-        os.path.join("blackjack", "computer_vision", "temp_image", image_file_name),
+        os.path.join("computer_vision", "temp_image", image_file_name),
         confidence=int(ROBOFLOW_CONFIDENCE),
         overlap=int(ROBOFLOW_OVERLAP),
     ).json()["predictions"]
