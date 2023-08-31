@@ -1,16 +1,17 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.responses import Response
-from pathlib import Path
 
 import numpy as np
-import pandas as pd
 import cv2
-import io
 import os
 
+<<<<<<< HEAD:blackjack/computer_vision/api.py
 from blackjack.computer_vision.model import load_roboflow_model, predict_roboflow_model
 from blackjack.computer_vision.clustering import cluster_one_player_advanced
+=======
+from computer_vision.interface.model import load_roboflow_model, predict_roboflow_model
+from computer_vision.interface.clustering import cluster_one_player
+>>>>>>> bd1bc4e26892c081653414ec7f3ad90c498b5f19:blackjack/computer_vision/computer_vision/api/fast.py
 
 app = FastAPI()
 
@@ -45,7 +46,7 @@ async def receive_image(img: UploadFile = File(...)):
     cv2_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)  # type(cv2_img) => numpy.ndarray
 
     # Image directory and file name
-    directory = os.path.join("blackjack", "computer_vision", "temp_image")
+    directory = os.path.join("computer_vision", "temp_image")
     filename = "input.png"
 
     # Temporarly saves image

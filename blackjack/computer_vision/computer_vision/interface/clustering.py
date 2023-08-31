@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 
 from sklearn.cluster import KMeans
-from blackjack.computer_vision.utils import timeit
+from computer_vision.interface.utils import timeit
 
 
 @timeit
