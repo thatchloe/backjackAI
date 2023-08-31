@@ -32,14 +32,14 @@ def predict_roboflow_model(
 ) -> pd.DataFrame:
     """
     Predict based on input Roboflow model, return df
+    Returns None if there is no predictions
     """
     card_predictions = model.predict(
         os.path.join("blackjack", "computer_vision", "temp_image", image_file_name),
         confidence=int(ROBOFLOW_CONFIDENCE),
         overlap=int(ROBOFLOW_OVERLAP),
     ).json()["predictions"]
-    card_predictions_df = pd.DataFrame(card_predictions)[["x", "y", "class"]]
 
     print("✅ predict with roboflow model")
 
-    return card_predictions_df
+    return pd.DataFrame(card_predictions) if not card_predictions == [] else None

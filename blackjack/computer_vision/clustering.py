@@ -10,6 +10,7 @@ def cluster_one_player(card_predictions_df: pd.DataFrame) -> pd.DataFrame:
     Clusters cards of dealer and player for simple case with only one player.
     Note(!): requires dealers cards to be on top of image!
     """
+
     # prepare data
     X = card_predictions_df[["x", "y"]]
 
