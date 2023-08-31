@@ -10,7 +10,7 @@ import io
 import os
 
 from blackjack.computer_vision.model import load_roboflow_model, predict_roboflow_model
-from blackjack.computer_vision.clustering import cluster_one_player
+from blackjack.computer_vision.clustering import cluster_one_player_advanced
 
 app = FastAPI()
 
@@ -62,6 +62,5 @@ async def receive_image(img: UploadFile = File(...)):
         return None
 
     else:
-        # clustered_cards = cluster_one_player(predictions)
-        card_predictions_dict = predictions.to_dict("records")
-        return card_predictions_dict
+        clustered_predictions = cluster_one_player_advanced(predictions)
+        return clustered_predictions

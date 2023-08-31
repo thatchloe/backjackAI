@@ -1,5 +1,8 @@
 from blackjack.computer_vision.model import load_roboflow_model, predict_roboflow_model
-from blackjack.computer_vision.clustering import cluster_one_player
+from blackjack.computer_vision.clustering import (
+    cluster_one_player,
+    cluster_one_player_advanced,
+)
 
 
 if __name__ == "__main__":
@@ -8,7 +11,8 @@ if __name__ == "__main__":
         card_predictions_df = predict_roboflow_model(
             model=model, image_file_name="test_image.png"
         )
-        cluster_one_player(card_predictions_df=card_predictions_df)
+        result = cluster_one_player_advanced(card_predictions_df=card_predictions_df)
+        print(result)
     except:
         import ipdb, traceback, sys
 
