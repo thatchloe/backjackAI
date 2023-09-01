@@ -1,8 +1,11 @@
 import numpy as np
 import cv2
 import imutils
+import os
+from utils import timeit
 
 
+@timeit
 def preprocess_image(image: np.ndarray) -> np.ndarray:
     """
     Takes image as nd array and applies edge detection.
@@ -16,10 +19,36 @@ def preprocess_image(image: np.ndarray) -> np.ndarray:
     image_blurred = cv2.GaussianBlur(image_greyscale, (5, 5), 0)
     image_canny_kernel = cv2.Canny(image_blurred, 50, 150)
 
+    print("✅ preprocessed image")
+
     return image_canny_kernel
 
 
-def find_contours(preprocessed_image: np.ndarray) -> list(np.ndarray):
+def preprocess_images_whole_folder(
+    origin_path: str = "", target_path: str = ""
+) -> None:
+    """
+    Iteratively apply preprocess image function to all image
+    in origin folder and save to target folder
+    """
+    # iterate over each image in folder
+    for filename in os.listdir(origin_path):
+        if filename.endswith(".jpg") or filename.endswith(".png"):
+            # load image into ndarray
+            image = cv2.imread(
+                os.path.join(origin_path, filename),
+                cv2.IMREAD_UNCHANGED,
+            )
+            # preprocess the image and save to target folder
+            preproc_image = preprocess_image(image)
+            cv2.imwrite(
+                os.path.join(target_path, filename),
+                preproc_image,
+            )
+
+
+@timeit
+def find_contours(preprocessed_image: np.ndarray) -> list:
     """
     Takes preprocessed image, performs contour detection,
     cuts contours and returns list of contour images
@@ -30,35 +59,20 @@ def find_contours(preprocessed_image: np.ndarray) -> list(np.ndarray):
     )
 
     # init list which will store images
-    cropped_contours = []
+    images_cropped = []
+    bounding_boxes = []
 
     # for each contour create bounding box
-    for i, contour in enumerate(contours):
+    for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
 
         # if bounding box is big enough and has acceptable ratio of width and height
         if w * h > 5000 and w / h > 0.25 and h / w > 0.25:
             # cut out contour from preprocessed image
-            cropped_contour = preprocessed_image[y : y + h, x : x + w]
-            cropped_contours.append(cropped_contour)
+            image_cropped = preprocessed_image[y : y + h, x : x + w]
+            images_cropped.append(image_cropped)
+            bounding_boxes.append([x, y, w, h])
 
-    return cropped_contours
+    print("✅ found contours in image and cropped them")
 
-
-if __name__ == "__main__":
-    try:
-        image = cv2.imread("../temp_image/example3.png", cv2.IMREAD_UNCHANGED)
-        preproc_image = preprocess_image(image)
-        cropped_contours = find_contours(preproc_image)
-        for i, image in enumerate(cropped_contours):
-            cv2.imwrite(
-                f"../temp_image/contours{i}.png",
-                image,
-            )
-
-    except:
-        import ipdb, traceback, sys
-
-        extype, value, tb = sys.exc_info()
-        traceback.print_exc()
-        ipdb.post_mortem(tb)
+    return {"images": images_cropped, "bounding_boxes": bounding_boxes}
