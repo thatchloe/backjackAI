@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize
 
 from sklearn.cluster import KMeans
 from computer_vision.interface.utils import timeit
@@ -59,20 +59,39 @@ def cluster_one_player_advanced(card_predictions_df: pd.DataFrame) -> pd.DataFra
     if card_predictions_df is None:
         return None
 
-    # get y coordinates of each pred, scale, create loss function for optimal horizontal line
-    y_scal = card_predictions_df["y"] / 1000
-    loss_function = lambda x: np.sum([np.abs(x - y) ** 3 for y in y_scal])
+    card_df = card_predictions_df.groupby("class")[["x", "y"]].mean()
 
-    # minimise loss function undo scaling, save y threshold
-    result = minimize_scalar(
-        loss_function, bounds=(np.min(y_scal), np.max(y_scal)), method="bounded"
-    )
-    y_threshold = round(result.x * 1000)
+    # get x,y coordinates of each card corner
+    y_scal = card_df["y"] / 100
+    x_scal = card_df["x"] / 100
 
-    # save clustering for each card based on y_thres
-    card_predictions_df["cluster"] = card_predictions_df["y"].apply(
-        lambda y: "dealer" if y < y_threshold else "player"
+    # define loss function based on pure y distance of each card corner from line a * x + b
+    # with parameters to be optimised: opt_vars = [a,b]
+    loss_function = lambda opt_vars: np.sum(
+        [
+            np.abs((opt_vars[0] * x + opt_vars[1]) - y) ** 2
+            for x, y in zip(x_scal, y_scal)
+        ]
     )
+
+    # minimise loss function
+    result = minimize(
+        loss_function, x0=[0, 0], method="L-BFGS-B", bounds=[(-2, -0.1), (-2500, 2500)]
+    )
+
+    # unpack resulting params and undo scaling on y intercept
+    a, b = result.x
+    b = b * 100
+
+    # create threshold function and calculate if card corner is in dealer or player cluster
+    threshold_line = lambda x: x * a + b
+    card_df["cluster"] = card_df.apply(
+        lambda row: "dealer" if row["y"] < threshold_line(row["x"]) else "player",
+        axis=1,
+    )
+    card_df.reset_index(inplace=True)
+
+    card_predictions_df.merge(card_df[["class", "cluster"]], on="class", how="left")
 
     # clean cols, clean duplicate rows
     card_predictions_df.drop(columns=["image_path", "prediction_type"], inplace=True)
@@ -87,4 +106,8 @@ def cluster_one_player_advanced(card_predictions_df: pd.DataFrame) -> pd.DataFra
 
     print("✅ clustered predictions for one player")
 
-    return {"by_corner": by_corners_dict, "by_person": by_person_dict}
+    return {
+        "by_corner": by_corners_dict,
+        "by_person": by_person_dict,
+        "line_params": (a, b),
+    }
