@@ -2,7 +2,6 @@ import cv2
 import os
 from preprocessing import (
     preprocess_image,
-    preprocess_images_whole_folder,
     find_contours,
 )
 
@@ -26,7 +25,7 @@ def test_pipe(exaple_image_name: str = "example1.png") -> None:
     preproc_image = preprocess_image(image)
     result = find_contours(preproc_image)
 
-    # TODO: all other stuff either here
+    # TODO: all other stuff here
 
     # save cropped images in contour folder
     for i, image in enumerate(result["images"]):

@@ -51,7 +51,8 @@ def preprocess_images_whole_folder(
 def find_contours(preprocessed_image: np.ndarray) -> list:
     """
     Takes preprocessed image, performs contour detection,
-    cuts contours and returns list of contour images
+    cuts contours and returns list of contour images as well as
+    list of bounding boxes of format x, y, w, h
     """
     # Find contours in preprocessed image
     contours, _ = cv2.findContours(
