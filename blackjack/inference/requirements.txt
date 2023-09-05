@@ -1,0 +1,10 @@
+roboflow
+fastapi
+pytz
+uvicorn
+python-multipart
+pandas
+numpy
+opencv-python
+scikit-learn
+pycocotools
