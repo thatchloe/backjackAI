@@ -4,9 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import tensorflow as tf
 import cv2
-import os
 
-from computer_vision.interface.yolo import create_custom_model, load_model, prediction
+from inference.interface.preprocessing import preprocess_image, find_contours
+from inference.interface.yolo import load_model, cards_prediction, class_mapping
 
 app = FastAPI()
 
@@ -25,7 +25,7 @@ app.state.model = load_model()
 
 @app.get("/")
 def index():
-    return {"status": "ok"}
+    return {"status": "API up and running :)"}
 
 
 @app.post("/card_predictions")
@@ -33,22 +33,50 @@ async def receive_image(img: UploadFile = File(...)):
     """
     Given an image, returns predictions and clusters.
     """
-
+    # Read image (aka video frame)
     contents = await img.read()
 
-    decoded_img = tf.io.decode_image(contents, channels=3, dtype=tf.dtypes.uint8)
-    input_img = tf.image.resize(decoded_img, (416, 416))
-    input_img = tf.expand_dims(input_img, axis=0)
-    input_img = tf.cast(input_img, tf.float32)
+    # Convert image to np.ndarray
+    nparr = np.fromstring(contents, np.uint8)
+    cv2_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)  # type(cv2_img) => numpy.ndarray
 
-    # Temporarly saves image
+    breakpoint()
+    # Find countours from frame
+    preproc_image = preprocess_image(cv2_img)
+    countours = find_contours(preproc_image)
+
+    # Crop countours from frame
+    frames_cropped = []
+    for bounding_box in countours["bounding_boxes"]:
+        x, y, w, h = bounding_box
+        frame_cropped = cv2_img[y : y + h, x : x + w]
+        frames_cropped.append(frame_cropped)
+
+    # for frame in frames_cropped:
+    # Convert the image back to a binary string
+    original_contents = cv2.imencode(".jpg", preproc_image)[1].tobytes()
+
+    # Make prediction on cached model and preprocessed images
     model = app.state.model
+    predictions = cards_prediction(image=contents, model=model)
 
-    # Make prediction on cached model
-    predictions = model.predict(input_img)
-
+    # Save predictions output to individual np.ndarrays
     boxes = predictions["boxes"][0]
     classes = predictions["classes"][0]
-    num_detections = predictions["num_detections"]
+    confidences = predictions["confidence"][0]
+    num_detections = int(predictions["num_detections"][0])
 
-    return {"boxes": boxes, "classes": classes, "num_detections": num_detections}
+    # Convert from np.ndarrays to regular lists
+    clean_boxes = [box.tolist() for box in boxes[:num_detections]]
+    clean_classes = classes[:num_detections].tolist()
+    clean_confidences = confidences[:num_detections].tolist()
+
+    # Convert clean_classes to real card codes
+    predicted_cards = [class_mapping[card] for card in clean_classes]
+
+    return {
+        "num_detections": num_detections,
+        "cards": predicted_cards,
+        "boxes": clean_boxes,
+        "confidence": clean_confidences,
+    }
