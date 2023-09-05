@@ -73,12 +73,12 @@ def find_contours(preprocessed_image: np.ndarray) -> list:
             images_cropped.append(image_cropped)
 
             # Calculate relative coordinates
-            # x_rel = x / preprocessed_image.shape[0]
-            # w_rel = w / preprocessed_image.shape[0]
-            # y_rel = y / preprocessed_image.shape[1]
-            # h_rel = h / preprocessed_image.shape[1]
+            x_rel = x / preprocessed_image.shape[1]
+            w_rel = w / preprocessed_image.shape[1]
+            y_rel = y / preprocessed_image.shape[0]
+            h_rel = h / preprocessed_image.shape[0]
 
-            bounding_boxes.append([x, y, w, h])
+            bounding_boxes.append([x_rel, y_rel, w_rel, h_rel])
 
     print("✅ found and cropped contours in image")
 

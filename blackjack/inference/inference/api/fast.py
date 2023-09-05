@@ -31,48 +31,72 @@ def index():
 @app.post("/card_predictions")
 async def receive_image(img: UploadFile = File(...)):
     """
-    Given an image, returns predictions and clusters.
+    Given an image, returns predictions and clusters from its cropped countours.
     """
     # Read image (aka video frame)
     contents = await img.read()
 
-    # Convert image to np.ndarray
+    breakpoint()
+
+    # Convert image to np.ndarray to be able to preprocess it (find countours)
     nparr = np.fromstring(contents, np.uint8)
     cv2_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)  # type(cv2_img) => numpy.ndarray
 
-    breakpoint()
     # Find countours from frame
     preproc_image = preprocess_image(cv2_img)
     countours = find_contours(preproc_image)
 
     # Crop countours from frame
-    frames_cropped = []
+    cropped_frames = []
+
     for bounding_box in countours["bounding_boxes"]:
-        x, y, w, h = bounding_box
+        x_rel, y_rel, w_rel, h_rel = bounding_box
+
+        # Convert relative coordinates to absolute coordinates
+        x = int(round(x_rel * cv2_img.shape[1], 0))
+        w = int(round(w_rel * cv2_img.shape[1], 0))
+
+        y = int(round(y_rel * cv2_img.shape[0], 0))
+        h = int(round(h_rel * cv2_img.shape[0], 0))
+
+        # Crop frame
         frame_cropped = cv2_img[y : y + h, x : x + w]
-        frames_cropped.append(frame_cropped)
+        cropped_frames.append(frame_cropped)
 
-    # for frame in frames_cropped:
-    # Convert the image back to a binary string
-    original_contents = cv2.imencode(".jpg", preproc_image)[1].tobytes()
-
-    # Make prediction on cached model and preprocessed images
+    # Save cached model
     model = app.state.model
-    predictions = cards_prediction(image=contents, model=model)
 
-    # Save predictions output to individual np.ndarrays
-    boxes = predictions["boxes"][0]
-    classes = predictions["classes"][0]
-    confidences = predictions["confidence"][0]
-    num_detections = int(predictions["num_detections"][0])
+    num_detections = []
+    predicted_cards = []
+    clean_boxes = []
+    clean_confidences = []
 
-    # Convert from np.ndarrays to regular lists
-    clean_boxes = [box.tolist() for box in boxes[:num_detections]]
-    clean_classes = classes[:num_detections].tolist()
-    clean_confidences = confidences[:num_detections].tolist()
+    for frame in cropped_frames:
+        # Convert the cropped frame back to a binary string
+        frame_recoded = cv2.imencode(".jpg", frame)[1].tobytes()
 
-    # Convert clean_classes to real card codes
-    predicted_cards = [class_mapping[card] for card in clean_classes]
+        # Make prediction on cached model and cropped frame
+        predictions_frame = cards_prediction(image=frame_recoded, model=model)
+
+        # Save predictions output to individual np.ndarrays
+        boxes_frame = predictions_frame["boxes"][0]
+        classes_frame = predictions_frame["classes"][0]
+        confidences_frame = predictions_frame["confidence"][0]
+        num_detections_frame = int(predictions_frame["num_detections"][0])
+
+        # Convert from np.ndarrays to regular lists
+        clean_boxes_frame = [box.tolist() for box in boxes_frame[:num_detections_frame]]
+        clean_classes_frame = classes_frame[:num_detections_frame].tolist()
+        clean_confidences_frame = confidences_frame[:num_detections_frame].tolist()
+
+        # Convert clean_classes to real card codes
+        predicted_cards_frame = [class_mapping[card] for card in clean_classes_frame]
+
+        # Append detections from the frame to results
+        num_detections.append(num_detections_frame)
+        predicted_cards.append(predicted_cards_frame)
+        clean_boxes.append(clean_boxes_frame)
+        clean_confidences.append(clean_confidences_frame)
 
     return {
         "num_detections": num_detections,
