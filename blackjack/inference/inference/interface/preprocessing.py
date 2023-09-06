@@ -2,17 +2,16 @@ import numpy as np
 import cv2
 import imutils
 import os
-from utils import timeit
 
 
-@timeit
 def preprocess_image(image: np.ndarray) -> np.ndarray:
     """
     Takes image as nd array and applies edge detection.
     Returns counters
     """
-    # Read image and convert to gray to greyscale
-    image_resized = imutils.resize(image, width=1000)
+    # Read image and convert to greyscale
+    image_resized = imutils.resize(image, height=1000, width=1000)
+    # image_resized = image
     image_greyscale = cv2.cvtColor(image_resized, cv2.COLOR_BGR2GRAY)
 
     # Apply Gaussian Blur and Canny edge detection
@@ -47,7 +46,6 @@ def preprocess_images_whole_folder(
             )
 
 
-@timeit
 def find_contours(preprocessed_image: np.ndarray) -> list:
     """
     Takes preprocessed image, performs contour detection,
@@ -59,6 +57,8 @@ def find_contours(preprocessed_image: np.ndarray) -> list:
         preprocessed_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
     )
 
+    preprocessed_image_size = preprocessed_image.shape[0] * preprocessed_image.shape[1]
+
     # init list which will store images
     images_cropped = []
     bounding_boxes = []
@@ -68,12 +68,20 @@ def find_contours(preprocessed_image: np.ndarray) -> list:
         x, y, w, h = cv2.boundingRect(contour)
 
         # if bounding box is big enough and has acceptable ratio of width and height
-        if w * h > 5000 and w / h > 0.25 and h / w > 0.25:
+        if ((w * h) / preprocessed_image_size) > 0.01 and w / h > 0.25 and h / w > 0.25:
             # cut out contour from preprocessed image
             image_cropped = preprocessed_image[y : y + h, x : x + w]
             images_cropped.append(image_cropped)
-            bounding_boxes.append([x, y, w, h])
 
-    print("✅ found contours in image and cropped them")
+            # Calculate relative coordinates
+            x_rel = x / preprocessed_image.shape[1]
+            w_rel = w / preprocessed_image.shape[1]
+
+            y_rel = y / preprocessed_image.shape[0]
+            h_rel = h / preprocessed_image.shape[0]
+
+            bounding_boxes.append([x_rel, y_rel, w_rel, h_rel])
+
+    print("✅ found and cropped contours in image")
 
     return {"images": images_cropped, "bounding_boxes": bounding_boxes}

@@ -1,3 +1,4 @@
+import os
 import keras_cv
 import tensorflow as tf
 
@@ -56,10 +57,14 @@ class_ids = [
     "Qh",
     "Qs",
 ]
+
 class_mapping = dict(zip(range(len(class_ids)), class_ids))
 
 
 def create_custom_model():
+    """
+    Creates custom yolo model. Returns the model.
+    """
     backbone = keras_cv.models.YOLOV8Backbone.from_preset("yolo_v8_xl_backbone_coco")
     yolo = keras_cv.models.YOLOV8Detector(
         num_classes=len(class_mapping),
@@ -71,24 +76,34 @@ def create_custom_model():
 
 
 def load_model():
+    """
+    Loads weightt of a pretrained custom yolo model. Returns the reconstructed model.
+    """
     reconstructed_yolo = create_custom_model()
     reconstructed_yolo.load_weights(
-        "/Users/sergi/code/seeergiii/blackjack/blackjack/computer_vision/models__20230905-0551_model_weights.h5"
+        os.path.abspath(os.path.join("models__20230905-0551_model_weights.h5"))
     )
     return reconstructed_yolo
+
+
+def predict_cards(img, model):
+    image = tf.image.decode_jpeg(img, channels=3)
+    image = tf.image.resize(image, (416, 416))
+    image = tf.expand_dims(image, axis=0)
+    image = tf.cast(image, tf.float32)
+
+    y_pred = model.predict(image)
+
+    return y_pred
 
 
 model = load_model()
 
 image = tf.io.read_file(
-    "/Users/sergi/code/seeergiii/blackjack/blackjack/computer_vision/computer_vision/interface/test.jpg"
+    os.path.abspath(os.path.join("inference", "interface", "test.jpg"))
 )
-image = tf.image.decode_jpeg(image, channels=3)
 
-image = tf.cast(image, tf.float32)
-image = tf.image.resize(image, (416, 416))
-image = tf.expand_dims(image, axis=0)
+y_pred = predict_cards(image, model)
 
-y_pred = model.predict(image)
 
 print(y_pred)

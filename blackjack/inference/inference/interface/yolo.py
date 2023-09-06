@@ -1,3 +1,4 @@
+import os
 import keras_cv
 import tensorflow as tf
 
@@ -73,15 +74,17 @@ def create_custom_model():
 def load_model():
     reconstructed_yolo = create_custom_model()
     reconstructed_yolo.load_weights(
-        "/Users/sergi/code/seeergiii/blackjack/blackjack/computer_vision/models__20230905-0551_model_weights.h5"
+        os.path.abspath(os.path.join("models__20230905-0551_model_weights.h5"))
     )
     return reconstructed_yolo
 
 
-def prediction(image, model):
-    input_image = tf.convert_to_tensor(image, dtype=tf.float32)
-    input_image = tf.image.resize(input_image, (416, 416))
-    input_image = tf.expand_dims(input_image, axis=0)
-    input_image = tf.cast(input_image, tf.float32)
-    y_pred = model.predict(input_image)
+def cards_prediction(image, model):
+    decoded_img = tf.io.decode_image(image, channels=3, dtype=tf.dtypes.uint8)
+    resized_img = tf.image.resize(decoded_img, (416, 416))
+    expanded_img = tf.expand_dims(resized_img, axis=0)
+    casted_img = tf.cast(expanded_img, tf.float32)
+
+    y_pred = model.predict(casted_img)
+
     return y_pred
