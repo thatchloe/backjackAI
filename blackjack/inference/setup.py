@@ -5,4 +5,4 @@ with open("requirements.txt", "r") as file:
 
 requirements = [each.strip() for each in lines]
 
-setup(name="computer_vision", packages=find_packages(), install_requires=requirements)
+setup(name="inference", packages=find_packages(), install_requires=requirements)

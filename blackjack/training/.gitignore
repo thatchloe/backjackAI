@@ -1,0 +1,8 @@
+.env
+.envrc
+datacrunch_key
+datacrunch_key.pub
+lewagon-bootcamp-392414-1d50cb6cb1d9.json
+data.zip
+**/training.egg-info
+**/__pycache__

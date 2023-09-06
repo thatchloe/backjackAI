@@ -7,3 +7,4 @@
 *.pyc
 *.h5
 *.yaml
+blackjack/training/.data
