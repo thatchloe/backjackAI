@@ -10,7 +10,8 @@ def preprocess_image(image: np.ndarray) -> np.ndarray:
     Returns counters
     """
     # Read image and convert to greyscale
-    image_resized = imutils.resize(image, width=1000)
+    image_resized = imutils.resize(image, height=1000, width=1000)
+    # image_resized = image
     image_greyscale = cv2.cvtColor(image_resized, cv2.COLOR_BGR2GRAY)
 
     # Apply Gaussian Blur and Canny edge detection
@@ -75,6 +76,7 @@ def find_contours(preprocessed_image: np.ndarray) -> list:
             # Calculate relative coordinates
             x_rel = x / preprocessed_image.shape[1]
             w_rel = w / preprocessed_image.shape[1]
+
             y_rel = y / preprocessed_image.shape[0]
             h_rel = h / preprocessed_image.shape[0]
 

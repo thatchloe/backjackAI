@@ -49,8 +49,8 @@ async def receive_image(img: UploadFile = File(...)):
     # Crop countours from frame
     cropped_frames = []
 
-    for bounding_box in countours["bounding_boxes"]:
-        x_rel, y_rel, w_rel, h_rel = bounding_box
+    for countor_box in countours["bounding_boxes"]:
+        x_rel, y_rel, w_rel, h_rel = countor_box
 
         # Convert relative coordinates to absolute coordinates
         x = int(round(x_rel * cv2_img.shape[1], 0))
@@ -60,12 +60,15 @@ async def receive_image(img: UploadFile = File(...)):
         h = int(round(h_rel * cv2_img.shape[0], 0))
 
         # Crop frame
-        frame_cropped = cv2_img[y : y + h, x : x + w]
+        frame_cropped = cv2_img[
+            int(y * 0.90) : int((y + h) * 1.1), int(x * 0.90) : int((x + w) * 1.1)
+        ]
         cropped_frames.append(frame_cropped)
 
     # Save cached model
     model = app.state.model
 
+    # Variables to store the results for each frame
     num_detections = []
     predicted_cards = []
     clean_boxes = []
