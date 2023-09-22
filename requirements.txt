@@ -5,6 +5,7 @@ seaborn
 matplotlib
 scikit-learn
 ipdb
+cv2
 
 # Computer vision
 roboflow
