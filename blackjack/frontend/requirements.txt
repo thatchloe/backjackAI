@@ -12,7 +12,7 @@ ipdb
 opencv-python
 
 # Computer vision
-roboflow==1.0.0
+roboflow
 
 
 
