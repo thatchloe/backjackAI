@@ -9,7 +9,7 @@ seaborn
 matplotlib
 scikit-learn
 ipdb
-opencv-python
+opencv-python-headless
 
 # Computer vision
 roboflow
