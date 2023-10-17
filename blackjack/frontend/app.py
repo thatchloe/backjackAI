@@ -36,8 +36,9 @@ while True:
     # resized_frame = cv2.resize(frame, (ROBOFLOW_SIZE, ROBOFLOW_SIZE))
     # cv2_img = cv2.imdecode(frame, cv2.IMREAD_COLOR)  # type(cv2_img) => numpy.ndarray
     # st.write("Type", type(cv2_img))
-    success, encoded_image = cv2.imencode(".png", frame)
-    if image is not None:
+    if frame is not None and not frame.empty():
+        success, encoded_image = cv2.imencode(".png", frame)
+ 
 
         rame_bytes = encoded_image.tobytes()
     
