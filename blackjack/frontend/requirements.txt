@@ -1,21 +1,15 @@
-#frontend
+
 streamlit
 requests
 opencv-python-headless
-#standard
 numpy
 pandas
 seaborn
 matplotlib
-
-
-
-# Computer vision
+pytesseract
+nltk
+scikit-learn
 roboflow
-
-
-
-# API
 fastapi
 
 
