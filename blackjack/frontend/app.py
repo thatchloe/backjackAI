@@ -7,7 +7,7 @@ import io
 
 from roboflow import Roboflow
 
-from blackjack.computer_vision.params import (
+from blackjack.frontend.params import (
     ROBOFLOW_API_KEY,
     ROBOFLOW_MODEL,
     ROBOFLOW_VERSION,
