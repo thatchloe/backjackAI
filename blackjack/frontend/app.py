@@ -7,7 +7,7 @@ import io
 
 from roboflow import Roboflow
 
-from frontend.params import (
+from params import (
     ROBOFLOW_API_KEY,
     ROBOFLOW_MODEL,
     ROBOFLOW_VERSION,
